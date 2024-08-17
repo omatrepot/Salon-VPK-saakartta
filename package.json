@@ -1,5 +1,5 @@
 {
-  "name": "saapalvelu",
+  "name": "tutkain",
   "version": "0.0.1",
   "description": "Finnish radar data as a radar composite product",
   "main": "index.js",
