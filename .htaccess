@@ -1,3 +1,8 @@
+# Ensure UTF-8 encoding for text files
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .css .js
+
+# Uncomment the following block if you need to disable caching for specific file types
 # <filesMatch "\.(js|css|html)$">
 #   FileETag None
 #   <ifModule mod_headers.c>    
@@ -8,6 +13,7 @@
 #   </ifModule>
 # </filesMatch>
 
+# Uncomment the following block if you need to set cache control for PNG files
 # <Files *.png>
 # Header add "Cache-Control" "max-age=604800"
 # </Files>
@@ -15,5 +21,8 @@
 Header set Cache-Control "no-cache"
 
 RewriteEngine On
-RewriteCond %{HTTPS} !on
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Ensure HTTPS
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
