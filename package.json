@@ -1,5 +1,5 @@
 {
-  "name": "tutkain",
+  "name": "saapalvelu",
   "version": "0.0.1",
   "description": "Finnish radar data as a radar composite product",
   "main": "index.js",
@@ -12,7 +12,7 @@
     "opendata",
     "fmi"
   ],
-  "author": "Ville Ilkka",
+  "author": "Timo Elovaara",
   "license": "MIT",
   "private": true,
   "dependencies": {
@@ -23,6 +23,7 @@
     "leaflet-spin": "^1.1.0",
     "leaflet-timedimension": "^1.1.0",
     "leaflet.locatecontrol": "^0.72.0",
+    "leaflet-search": "^2.7.0",
     "moment": "^2.24.0"
   }
 }
