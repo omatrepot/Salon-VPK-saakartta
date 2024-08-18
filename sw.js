@@ -2,11 +2,11 @@
 var version = 'v0.38'
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').then(function (registration) {
       // Registration was successful
       // console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function(err) {
+    }, function (err) {
       // registration failed :(
       // console.log('ServiceWorker registration failed: ', err);
     })
@@ -19,21 +19,21 @@ var urlsToCache = [
   '/style.css'
 ];
 
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   // Perform install steps
   event.waitUntil(
     caches
       .open(CACHE_NAME + version)
-      .then(function(cache) {
+      .then(function (cache) {
         // console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   )
 })
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function (event) {
 
-  if ( event.request.url.indexOf( '/php/' ) !== -1 ) {
+  if (event.request.url.indexOf('/php/') !== -1) {
     // console.log(event.request.url)
     // console.log(event)
     return false
@@ -41,7 +41,7 @@ self.addEventListener('fetch', function(event) {
 
   event.respondWith(
     caches.match(event.request)
-      .then(function(response) {
+      .then(function (response) {
 
         if (response) {
           return response
@@ -50,9 +50,9 @@ self.addEventListener('fetch', function(event) {
         // console.log(event.request)
 
         return fetch(event.request).then(
-          function(response) {
+          function (response) {
             // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
               return response
             }
 
@@ -63,7 +63,7 @@ self.addEventListener('fetch', function(event) {
             var responseToCache = response.clone()
 
             caches.open(CACHE_NAME + version)
-              .then(function(cache) {
+              .then(function (cache) {
                 cache.put(event.request, responseToCache)
               })
 
@@ -71,12 +71,12 @@ self.addEventListener('fetch', function(event) {
           }
         )
       })
-    )
+  )
 })
 
-caches.keys().then(function(names) {
+caches.keys().then(function (names) {
   for (let name of names)
-    if(name !== CACHE_NAME + version)
+    if (name !== CACHE_NAME + version)
       caches.delete(name);
 });
 

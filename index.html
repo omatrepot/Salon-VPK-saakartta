@@ -59,19 +59,18 @@
     <h1>Tietoja palvelusta</h1>
     <p>
       <b>https://www.salonvpk.fi/saapalvelu/</b> visualisoi Ilmatieteen laitoksen <a href="https://www.ilmatieteenlaitos.fi/avoin-data">avointa</a> 
-        tutkakuva-aineistoa sekä salamahavaintoja. Toiminnont perustuvat Ville Ilkkan alkuperäiseen totetutukseen.
+        tutkakuva-aineistoa sekä salamahavaintoja.
     </p>
     <p>
       Salamahavainnot on lajiteltu siten, että </b><span style="color:red">punaisilla</span></b> pisteillä esitetään maasalamat ja
       <b><span style="color:violet">purppuran</span></b> värisillä pilvisalamat.
     </p>
-    <p>Satelliittihavainnot ovat Eumetsatin <a href="https://www.eumetsat.int/website/home/Images/EUMETViewImageService/index.html">avointa dataa</a>.</p>
+    <!--<p>Satelliittihavainnot ovat Eumetsatin <a href="https://www.eumetsat.int/website/home/Images/EUMETViewImageService/index.html">avointa dataa</a>.</p>-->
     
     
     <div id="sidebar-footer" style="position: absolute; bottom: 30px;">
       <hr/>
-      <p>Projektin alkuperäinen lähdekoodi löytyy <a href="https://github.com/nakkim/tutkain">githubista</a> </p> 
-      <p>Alkuperäinen sivusto löytyy osoitteesta <a href="https://tutkain.info">tutkain.info</a></p>
+      <p>Projektin lähdekoodi on saatvilla <a href="https://github.com/nakkim/tutkain"> githubista</a> ja alkuperäinen sivusto on osoitteessa <a href="https://tutkain.info">tutkain.info</a></p>
     </div>
   </div>
 
@@ -84,13 +83,26 @@
   saa.tutkain.initMap()
 </script>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143251805-1"></script>
-<script>
+<!-- Google Analytics snippet -->
+<script src="https://www.googletagmanager.com/gtag/js?id=UA-5355946-9" id="google_gtagjs-js" async></script>
+<script id="google_gtagjs-js-after">
+  // Initialize the dataLayer if it doesn't exist
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-143251805-1');
+  
+  // Define the gtag function
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  
+  // Set linker domains for cross-domain tracking
+  gtag('set', 'linker', { "domains": ["www.salonvpk.fi"] });
+  // Initialize Google Analytics
+  gtag("js", new Date());
+  // Set developer ID (optional, for debugging or additional features)
+  gtag("set", "developer_id.dZTNiMT", true);
+  // Configure Google Analytics with anonymized IP
+  gtag("config", "UA-5355946-9", { "anonymize_ip": true });
 </script>
+<!-- End Google Analytics snippet -->
 
 </html>

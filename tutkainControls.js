@@ -71,10 +71,10 @@ var saa = saa || {};
           position: 'left',
           closeButton: true
         });
-        
+
         map.addControl(sidebar);
 
-        container.onclick = function(){
+        container.onclick = function () {
           sidebar.toggle();
         }
         container.title = 'Lisätietoja palvelusta'
@@ -137,7 +137,7 @@ var saa = saa || {};
       onAdd: function (map) {
         var div = L.DomUtil.create('div', 'map-control-container')
         div.id = 'map-control-container'
-        if(saa.tutkain.collapseOptions == 'false') {
+        if (saa.tutkain.collapseOptions == 'false') {
           div.style = 'display:none'
         }
 
@@ -226,10 +226,10 @@ var saa = saa || {};
         input.id = 'animation-speedslider-select'
         input.type = 'checkbox'
         input.style = 'width:auto; margin-left:0;'
-        if(saa.tutkain.timeSlider == true || saa.tutkain.timeSlider == 'true') {
+        if (saa.tutkain.timeSlider == true || saa.tutkain.timeSlider == 'true') {
           input.value = '1'
           input.setAttribute('checked', 'checked');
-        } else { 
+        } else {
           input.value = '0'
           input.removeAttribute('checked');
         }
@@ -239,7 +239,7 @@ var saa = saa || {};
         satelliteContent.textContent = 'Satelliittikuva: '
         var productSelect = L.DomUtil.create('select', 'content-select', satelliteContent)
         productSelect.id = 'satelite-product-select',
-        productSelect.value = saa.tutkain.selectedSatelliteProduct
+          productSelect.value = saa.tutkain.selectedSatelliteProduct
 
         var satelliteImages = []
         for (var i = 0; i < 2; i++) {
@@ -255,7 +255,7 @@ var saa = saa || {};
 
         productSelect.value = saa.tutkain.selectedSatelliteProduct
 
-        productSelect.addEventListener("change", function() {
+        productSelect.addEventListener("change", function () {
           saa.tutkain.selectedSatelliteProduct = this.value
           localStorage.setItem('satelliteProduct', saa.tutkain.selectedSatelliteProduct)
           saa.tutkain.getTimeData()
@@ -272,21 +272,21 @@ var saa = saa || {};
 
     // Update the current slider value (each time one drags the slider handle)
     var slider = document.getElementById("map-control-container-controller-opacity-range-radar");
-    slider.oninput = function() {
+    slider.oninput = function () {
       saa.tutkain.radarOpacity = this.value;
-      saa.tutkain.radarTimeLayer.setOpacity(this.value/100);
+      saa.tutkain.radarTimeLayer.setOpacity(this.value / 100);
       localStorage.setItem('radarOpacity', saa.tutkain.radarOpacity)
     }
     var slider2 = document.getElementById("map-control-container-controller-opacity-range-satellite");
-    slider2.oninput = function() {
+    slider2.oninput = function () {
       saa.tutkain.satOpacity = this.value;
-      saa.tutkain.satelliteTimeLayer.setOpacity(this.value/100);
+      saa.tutkain.satelliteTimeLayer.setOpacity(this.value / 100);
       localStorage.setItem('satOpacity', saa.tutkain.satOpacity)
     }
 
     // timeinterval select
     var timeInteralSelect = document.getElementById("animation-interval-select");
-    timeInteralSelect.addEventListener("change", function() {
+    timeInteralSelect.addEventListener("change", function () {
       saa.tutkain.timeInterval = this.value
       localStorage.setItem('timeInterval', saa.tutkain.timeInterval)
       saa.tutkain.getTimeData()
@@ -294,7 +294,7 @@ var saa = saa || {};
 
     // animation speed select
     var timeInteralSelect = document.getElementById("animation-speed-select");
-    timeInteralSelect.addEventListener("change", function() {
+    timeInteralSelect.addEventListener("change", function () {
       saa.tutkain.animFrameRate = this.value
       localStorage.setItem('animFrameRate', saa.tutkain.animFrameRate)
       saa.tutkain.getTimeData()
@@ -327,35 +327,35 @@ var saa = saa || {};
     // reload observations
     var reloadButton = document.getElementById("force-reload");
     reloadButton.addEventListener("click", function () {
-      if(typeof saa.tutkain.dataString !== 'undefined') {
+      if (typeof saa.tutkain.dataString !== 'undefined') {
         var last = (saa.tutkain.dataString['dimension'].split('/'))[1]
         last = moment(last)
         var diff = moment().diff(last, "minutes")
         // add check to prevent unnecessary getcapabilities polling
-        if(diff > 10 && (saa.tutkain.dataString['dimension'].split('/'))[2] === 'PT5M')
-        saa.tutkain.getTimeData('reload')
-        if(diff > 20 && (saa.tutkain.dataString['dimension'].split('/'))[1] === 'PT15M')
-        saa.tutkain.getTimeData('reload')
+        if (diff > 10 && (saa.tutkain.dataString['dimension'].split('/'))[2] === 'PT5M')
+          saa.tutkain.getTimeData('reload')
+        if (diff > 20 && (saa.tutkain.dataString['dimension'].split('/'))[1] === 'PT15M')
+          saa.tutkain.getTimeData('reload')
       }
     });
 
     // show/hide lightning observations
     var flashButton = document.getElementById("toggle-lightning-data");
     flashButton.addEventListener("click", function () {
-      if(map.hasLayer(saa.lightning.geoLayer)) {
+      if (map.hasLayer(saa.lightning.geoLayer)) {
         map.removeLayer(saa.lightning.geoLayer);
         flashButton.style = 'background-image: url(img/flash.png);'
       } else {
         map.addLayer(saa.lightning.geoLayer);
         flashButton.style = 'background-image: url(img/flash-blue.png);'
-     }
+      }
     });
 
     // show/hide control options
     var ctrlButton = document.getElementById("map-control");
     ctrlButton.addEventListener("click", function () {
 
-      if(saa.tutkain.collapseOptions === 'true') saa.tutkain.collapseOptions = true
+      if (saa.tutkain.collapseOptions === 'true') saa.tutkain.collapseOptions = true
       var ctrlDiv = document.getElementById('map-control-container')
       if (saa.tutkain.collapseOptions === true) {
         ctrlDiv.style = 'display:none'
@@ -369,15 +369,15 @@ var saa = saa || {};
     });
 
     var checkbox = document.getElementById('animation-speedslider-select')
-    checkbox.addEventListener('change', function() {
-      if(this.checked) {
+    checkbox.addEventListener('change', function () {
+      if (this.checked) {
         saa.tutkain.timeSlider = true
-        localStorage.setItem('timeSlider',true)
+        localStorage.setItem('timeSlider', true)
         saa.tutkain.getTimeData()
       } else {
         saa.tutkain.timeSlider = false
-        localStorage.setItem('timeSlider',false)
-        saa.tutkain.getTimeData()      
+        localStorage.setItem('timeSlider', false)
+        saa.tutkain.getTimeData()
       }
     })
   }

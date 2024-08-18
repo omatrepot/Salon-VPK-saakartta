@@ -1,6 +1,7 @@
 /* */
 
 var saa = saa || {};
+var autoPlay = false;
 
 (function (tutkain, undefined) {
   // 'use strict'   ooooor dont.
@@ -16,16 +17,16 @@ var saa = saa || {};
   var geosrvWMS = '//openwms.fmi.fi/geoserver/Radar/wms'
   var eumetsatWMS = '//eumetview.eumetsat.int/geoserver/wms'
 
-  saa.tutkain.timeInterval    = localStorage.getItem('timeInterval')     ? localStorage.getItem('timeInterval')    : 1
+  saa.tutkain.timeInterval = localStorage.getItem('timeInterval') ? localStorage.getItem('timeInterval') : 1
   // saa.tutkain.showSatellite   = localStorage.getItem('showSatellite')    ? localStorage.getItem('showSatellite')   : false
-  saa.tutkain.showSatellite   = false
+  saa.tutkain.showSatellite = false
   localStorage.setItem('showSatellite', false)
-  saa.tutkain.showFlash       = localStorage.getItem('showFlash')        ? localStorage.getItem('showFlash')       : true
-  saa.tutkain.animFrameRate   = localStorage.getItem('animFrameRate')    ? localStorage.getItem('animFrameRate')   : 1000
-  saa.tutkain.collapseOptions = localStorage.getItem('collapseOptions')  ? localStorage.getItem('collapseOptions') : false
-  saa.tutkain.radarOpacity    = localStorage.getItem('radarOpacity')     ? localStorage.getItem('radarOpacity')    : 50
-  saa.tutkain.satOpacity      = localStorage.getItem('satOpacity')       ? localStorage.getItem('satOpacity')      : 40
-  saa.tutkain.timeSlider      = localStorage.getItem('timeSlider')       ? localStorage.getItem('timeSlider')      : true
+  saa.tutkain.showFlash = localStorage.getItem('showFlash') ? localStorage.getItem('showFlash') : true
+  saa.tutkain.animFrameRate = localStorage.getItem('animFrameRate') ? localStorage.getItem('animFrameRate') : 1000
+  saa.tutkain.collapseOptions = localStorage.getItem('collapseOptions') ? localStorage.getItem('collapseOptions') : false
+  saa.tutkain.radarOpacity = localStorage.getItem('radarOpacity') ? localStorage.getItem('radarOpacity') : 50
+  saa.tutkain.satOpacity = localStorage.getItem('satOpacity') ? localStorage.getItem('satOpacity') : 40
+  saa.tutkain.timeSlider = localStorage.getItem('timeSlider') ? localStorage.getItem('timeSlider') : true
 
   var layerName = 'suomi_dbz_eureffin'
   saa.tutkain.lightningIntervalStart = 5
@@ -37,16 +38,21 @@ var saa = saa || {};
   var toggleAnimation = 'off'
   var isRunning = false
 
-  if(saa.tutkain.showSatellite == true || saa.tutkain.showSatellite == 'true') {
+  if (saa.tutkain.showSatellite == true || saa.tutkain.showSatellite == 'true') {
     saa.tutkain.lightningIntervalStart = 15
     saa.tutkain.lightningTimestep = 15
   }
 
   var geoLocationGroup = L.layerGroup()
 
-  var latitude   = localStorage.getItem('latitude')   ? localStorage.getItem('latitude')   : 60.630556
-  var longitude = localStorage.getItem('longitude') ? localStorage.getItem('longitude') : 24.859726
-  var zoomlevel  = localStorage.getItem('zoomlevel')  ? localStorage.getItem('zoomlevel')  : 8
+  // Get latitude, longitude, zoomlevel, showLightning, and autoplayAnimation from URL or use defaults
+  var latitude = getUrlParameter('latitude') || localStorage.getItem('latitude') || 60.3833; // Salo
+  var longitude = getUrlParameter('longitude') || localStorage.getItem('longitude') || 23.1333; // Salo
+  var zoomlevel = getUrlParameter('zoomlevel') || localStorage.getItem('zoomlevel') || 10; // Zoomed
+  var showLightning = getUrlParameter('showLightning') !== null ? getUrlParameter('showLightning') === 'true' : (localStorage.getItem('showLightning') !== null ? localStorage.getItem('showLightning') === 'true' : true);
+  var autoplayAnimation = getUrlParameter('autoplayAnimation') !== null ? getUrlParameter('autoplayAnimation') === 'true' : (localStorage.getItem('autoplayAnimation') !== null ? localStorage.getItem('autoplayAnimation') === 'true' : false);
+
+
 
   // observation update interval in ms
   var interval = 60000
@@ -64,14 +70,22 @@ var saa = saa || {};
     }
   }
 
+  // Function to get URL parameters
+  function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
+
   //callback that remap fields name
   function formatJSON(rawjson) {
     var json = {},
-        key,
-        loc,
-        disp = [];
+      key,
+      loc,
+      disp = [];
 
-    for(var i in rawjson) {
+    for (var i in rawjson) {
 
       disp = rawjson[i].display_name
       // if mobile and str length > 52, cut the tail out
@@ -80,23 +94,23 @@ var saa = saa || {};
       }
 
       key = disp
-      loc = L.latLng( rawjson[i].lat, rawjson[i].lon )
-      json[ key ] = loc	//key,value format
+      loc = L.latLng(rawjson[i].lat, rawjson[i].lon)
+      json[key] = loc	//key,value format
     }
     return json;
   }
 
-  function shortenString (string) {
+  function shortenString(string) {
     var shortString = ''
     var shortStringArray = string.split(', ')
-    for (var i=0; i<shortStringArray.length; i++) {
+    for (var i = 0; i < shortStringArray.length; i++) {
       if ((shortString + shortStringArray[i]).length < 52) {
         shortString = shortString + shortStringArray[i] + ', '
       } else {
         break
       }
     }
-    result = shortString.substr(0, shortString.length-2)
+    result = shortString.substr(0, shortString.length - 2)
     return result
   }
 
@@ -165,10 +179,10 @@ var saa = saa || {};
           tutkain.updateTimedimension(data)
           saa.lightning.init(saa.tutkain.dataString['dimension'], saa.tutkain.timeInterval)
         },
-        complete: function() {
+        complete: function () {
           saa.tutkain.map.spin(false)
         }
-        
+
       })
     }
   }
@@ -180,14 +194,36 @@ var saa = saa || {};
       minZoom: 5
     })
 
-    self.map.doubleClickZoom.disable(); 
+    // Set lightning visibility
+    if (showLightning) {
+      // Add lightning layer or make it visible
+      console.log('Lightning is visible');
+    } else {
+      // Hide lightning layer
+      console.log('Lightning is hidden');
+    }
+
+
+
+    // Autoplay animation
+    if (autoplayAnimation) {
+      // Start animation
+      console.log('Autoplay animation is enabled');
+      autoPlay = true;
+      // Add your animation start logic here
+    } else {
+      console.log('Autoplay animation is disabled');
+      autoPlay = false;
+    }
+
+    self.map.doubleClickZoom.disable();
 
     // remove default zoomcontrol and add a new one with custom titles
     self.map.zoomControl.remove()
-    L.control.zoom({zoomInTitle: 'Lähennä', zoomOutTitle: 'Loitonna'}).addTo(self.map)
+    L.control.zoom({ zoomInTitle: 'Lähennä', zoomOutTitle: 'Loitonna' }).addTo(self.map)
 
     // if theres no location info in localstorage, use latlon bounds
-    if(localStorage.getItem('latitude') === null) {
+    if (localStorage.getItem('latitude') === null) {
       var southWest = new L.LatLng(59.32, 18.29)
       var northEast = new L.LatLng(70.51, 32.35)
       var bounds = new L.LatLngBounds(southWest, northEast)
@@ -207,11 +243,11 @@ var saa = saa || {};
     saa.tutkainControl.buildLightningControl()
     saa.tutkainControl.buildControl()
     saa.tutkainControl.buildInfo()
-    saa.tutkainControl.buildReload()        
-    
-    document.getElementById('force-reload').onclick = function() {
+    saa.tutkainControl.buildReload()
+
+    document.getElementById('force-reload').onclick = function () {
       $('#reload-image').addClass('active');
-      setTimeout(function() {
+      setTimeout(function () {
         $('#reload-image').removeClass('active');
       }, 1000);
     }
@@ -237,11 +273,12 @@ var saa = saa || {};
       showPopup: false,
       strings: {
         title: 'Paikanna käyttäjä'
-      }}).addTo(saa.tutkain.map);
+      }
+    }).addTo(saa.tutkain.map);
     saa.tutkainControl.buildMapControl()
     tutkain.getTimeData()
 
-    saa.tutkain.map.on('click', function(e) {
+    saa.tutkain.map.on('click', function (e) {
       var ctrlDiv = document.getElementById('map-control-container')
       ctrlDiv.style = 'display:none'
       saa.tutkain.collapseOptions = false
@@ -256,7 +293,7 @@ var saa = saa || {};
     // }
 
     // if timedimensioncontrol already exists, remove it and all layers first
-    if(timeDimensionControl !== undefined) {
+    if (timeDimensionControl !== undefined) {
       self.map.removeControl(timeDimensionControl)
       saa.tutkain.map.removeLayer(saa.tutkain.radarTimeLayer)
       saa.tutkain.map.removeLayer(saa.tutkain.flashTimeLayer)
@@ -283,8 +320,8 @@ var saa = saa || {};
     );
     saa.tutkain.player = player
 
-    saa.tutkain.map.on('click', function(){
-      if(saa.tutkain.player.isPlaying()) {
+    saa.tutkain.map.on('click', function () {
+      if (saa.tutkain.player.isPlaying()) {
         saa.tutkain.player.stop()
       } else {
         saa.tutkain.player.start()
@@ -292,10 +329,10 @@ var saa = saa || {};
       }
     })
 
-    if(saa.tutkain.timeSlider == 'true') saa.tutkain.timeSlider = true
-    if(saa.tutkain.timeSlider == 'false') saa.tutkain.timeSlider = false    
+    if (saa.tutkain.timeSlider == 'true') saa.tutkain.timeSlider = true
+    if (saa.tutkain.timeSlider == 'false') saa.tutkain.timeSlider = false
 
-    var autoPlay = false
+
     // if (isRunning == true) autoPlay = true 
 
     var timeDimensionControlOptions = {
@@ -329,18 +366,18 @@ var saa = saa || {};
       format: 'image/png',
       tileSize: 512,
       transparent: true,
-      opacity: saa.tutkain.radarOpacity/100,
+      opacity: saa.tutkain.radarOpacity / 100,
       version: '1.3.0',
       crs: L.CRS.EPSG3857
       // bounds: L.latLngBounds(L.latLng(59.96,16.88),L.latLng(69.51,31.59))
     })
 
     var satellite = L.tileLayer.wms(eumetsatWMS, {
-      layers: saa.tutkain.satelliteImages[saa.tutkain.selectedSatelliteProduct]+',overlay:ne_10m_admin_0_boundary_lines_land', // meteosat:msg_dust, meteosat:msg_ash, meteosat:msg_airmass
+      layers: saa.tutkain.satelliteImages[saa.tutkain.selectedSatelliteProduct] + ',overlay:ne_10m_admin_0_boundary_lines_land', // meteosat:msg_dust, meteosat:msg_ash, meteosat:msg_airmass
       format: 'image/png',
       tileSize: 512,
       transparent: true,
-      opacity: saa.tutkain.satOpacity/100,
+      opacity: saa.tutkain.satOpacity / 100,
       version: '1.3.0',
       crs: L.CRS.EPSG3857
     })
@@ -361,8 +398,10 @@ var saa = saa || {};
     saa.tutkain.satelliteTimeLayer._availableTimes = []
 
     // because of local storage
-    if (saa.tutkain.showSatellite == true || saa.tutkain.showSatellite == 'true') { saa.tutkain.satelliteTimeLayer.addTo(self.map) }
-    saa.tutkain.radarTimeLayer.addTo(self.map)
+    if (saa.tutkain.showSatellite == true || saa.tutkain.showSatellite == 'true') {
+      saa.tutkain.satelliteTimeLayer.addTo(self.map);
+    }
+    saa.tutkain.radarTimeLayer.addTo(self.map);
 
     // set latest timestamp and pause animation
     saa.tutkain.map.timeDimension.prepareNextTimes(1, 12, true);
